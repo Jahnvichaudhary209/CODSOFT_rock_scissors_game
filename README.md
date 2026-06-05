@@ -1,6 +1,6 @@
 # Console Rock, Paper, Scissors Game
 
-An interactive, terminal-based implementation of the classic Rock, Paper, Scissors game built using Python. This program tracks scores across multiple rounds, validates user selections, and lets you play for as long as you want.
+An interactive, terminal-based implementation of the classic Rock, Paper, Scissors game built using Python. This program tracks scores across multiple rounds, validates user selections, and lets you play for as long as you want. Live at : https://radiant-pixie-eae1fd.netlify.app/
 
 ## 🚀 Features
 
