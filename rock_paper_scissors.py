@@ -1,75 +1,46 @@
+from flask import Flask, render_template, request, jsonify
 import random
 
-def get_computer_choice():
-    choices = ['rock', 'paper', 'scissors']
-    return random.choice(choices)
+app = Flask(__name__)
 
-def determine_winner(user, computer):
-    
+CHOICES = ['rock', 'paper', 'scissors']
+
+def get_result(user, computer):
     if user == computer:
         return 'tie'
-        
-  
     if (user == 'rock' and computer == 'scissors') or \
-       (user == 'paper' and computer == 'rock') or \
-       (user == 'scissors' and computer == 'paper'):
-        return 'user'
-        
+       (user == 'scissors' and computer == 'paper') or \
+       (user == 'paper' and computer == 'rock'):
+        return 'win'
+    return 'lose'
 
-    return 'computer'
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-def main():
-  
-    print("  Welcome to Rock, Paper, Scissors!      ")
- 
-    print("Instructions: Type your choice each round.")
-    print("Type 'exit' at any prompt to stop playing.\n")
-    
-  
-    user_score = 0
-    computer_score = 0
-    round_num = 1
-    
-    while True:
-        print(f"--- Round {round_num} ---")
-        user_choice = input("Choose rock, paper, or scissors: ").strip().lower()
-        
-        
-        if user_choice == 'exit':
-            break
-            
-        if user_choice not in ['rock', 'paper', 'scissors']:
-            print("Invalid input! Please check your spelling and try again.\n")
-            continue
-            
-        computer_choice = get_computer_choice()
-        print(f"Computer chose: {computer_choice}")
-        
-       
-        result = determine_winner(user_choice, computer_choice)
-        
-        if result == 'tie':
-            print("It's a tie match!")
-        elif result == 'user':
-            print("Nice! You won this round.")
-            user_score += 1
-        else:
-            print("Bummer, the computer took this round.")
-            computer_score += 1
-            
-     
-        print(f"\nScoreboard -> You: {user_score} | Computer: {computer_score}")
-        print("=====\n")
-        
-       
-        play_again = input("Want to play another round? (y/n): ").strip().lower()
-        if play_again != 'y' and play_again != 'yes':
-            break
-            
-        round_num += 1
+@app.route('/play', methods=['POST'])
+def play():
+    data = request.get_json()
+    user_choice = data.get('choice', '').lower()
 
-    print("\nThanks for playing!")
-    print(f"Final Results -> Rounds Played: {round_num} | Final Score - You: {user_score}, Computer: {computer_score}")
+    if user_choice not in CHOICES:
+        return jsonify({'error': 'Invalid choice'}), 400
 
-if __name__ == "__main__":
-    main()
+    computer_choice = random.choice(CHOICES)
+    result = get_result(user_choice, computer_choice)
+
+    messages = {
+        'win':  'You win! 🎉',
+        'lose': 'Computer wins! 😞',
+        'tie':  "It's a tie! 🤝"
+    }
+
+    return jsonify({
+        'user_choice': user_choice,
+        'computer_choice': computer_choice,
+        'result': result,
+        'message': messages[result]
+    })
+
+if __name__ == '__main__':
+    app.run(debug=True)
