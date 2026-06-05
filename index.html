@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rock Paper Scissors</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 22px;
+      color: #222;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 28px;
+    }
+
+    
+    .scoreboard {
+      display: flex;
+      justify-content: space-around;
+      background: #f9f9f9;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 28px;
+    }
+    .score-item { text-align: center; }
+    .score-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .score-num { font-size: 28px; font-weight: 700; color: #222; }
+    .score-num.you  { color: #2563eb; }
+    .score-num.cpu  { color: #dc2626; }
+    .score-num.tie  { color: #888; }
+
+   
+    .choices-label {
+      font-size: 13px; font-weight: 600; color: #555;
+      text-align: center; margin-bottom: 14px;
+    }
+    .choices {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .choice-btn {
+      background: white;
+      border: 2px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-size: 36px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+    }
+    .choice-btn span.label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .choice-btn:hover {
+      border-color: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37,99,235,0.12);
+    }
+    .choice-btn.selected {
+      border-color: #2563eb;
+      background: #eff6ff;
+    }
+
+    
+    .result-box {
+      background: #f9f9f9;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+    }
+    .result-box.hidden { visibility: hidden; }
+    .versus {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: #555;
+    }
+    .versus-emoji { font-size: 32px; }
+    .vs-text { font-weight: 700; color: #bbb; font-size: 14px; }
+    .result-msg {
+      font-size: 18px;
+      font-weight: 700;
+      color: #222;
+    }
+    .result-msg.win  { color: #16a34a; }
+    .result-msg.lose { color: #dc2626; }
+    .result-msg.tie  { color: #888; }
+
+   
+    .play-again-btn {
+      width: 100%;
+      padding: 13px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .play-again-btn:hover { background: #1d4ed8; }
+    .play-again-btn.hidden { display: none; }
+
+    /* Round history */
+    .history { margin-top: 20px; border-top: 1px solid #eee; padding-top: 16px; }
+    .history-title {
+      font-size: 11px; font-weight: 600; color: #888;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      display: flex; justify-content: space-between; margin-bottom: 10px;
+    }
+    .clear-btn {
+      background: none; border: none; color: #bbb;
+      font-size: 10px; cursor: pointer; text-transform: uppercase;
+      letter-spacing: 0.06em; transition: color 0.2s;
+    }
+    .clear-btn:hover { color: #dc2626; }
+    .history-list { display: flex; flex-direction: column; gap: 5px; max-height: 120px; overflow-y: auto; }
+    .history-item {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: #666; padding: 6px 10px;
+      background: #f9f9f9; border-radius: 6px;
+    }
+    .history-badge {
+      font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px;
+    }
+    .badge-win  { background: #dcfce7; color: #16a34a; }
+    .badge-lose { background: #fee2e2; color: #dc2626; }
+    .badge-tie  { background: #f3f4f6; color: #888; }
+    .history-empty { font-size: 12px; color: #ccc; text-align: center; padding: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✊ Rock Paper Scissors</h1>
+    <p class="subtitle">Pick your weapon and beat the computer!</p>
+
+  
+    <div class="scoreboard">
+      <div class="score-item">
+        <div class="score-label">You</div>
+        <div class="score-num you" id="scoreYou">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Ties</div>
+        <div class="score-num tie" id="scoreTie">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Computer</div>
+        <div class="score-num cpu" id="scoreCpu">0</div>
+      </div>
+    </div>
+
+   
+    <div class="choices-label">Choose your move:</div>
+    <div class="choices">
+      <button class="choice-btn" onclick="play('rock')">
+        ✊ <span class="label">Rock</span>
+      </button>
+      <button class="choice-btn" onclick="play('paper')">
+        🖐 <span class="label">Paper</span>
+      </button>
+      <button class="choice-btn" onclick="play('scissors')">
+        ✌️ <span class="label">Scissors</span>
+      </button>
+    </div>
+
+ 
+    <div class="result-box hidden" id="resultBox">
+      <div class="versus">
+        <div>
+          <div style="font-size:11px;color:#888;margin-bottom:4px;">You</div>
+          <div class="versus-emoji" id="userEmoji">—</div>
+        </div>
+        <div class="vs-text">VS</div>
+        <div>
+          <div style="font-size:11px;color:#888;margin-bottom:4px;">Computer</div>
+          <div class="versus-emoji" id="cpuEmoji">—</div>
+        </div>
+      </div>
+      <div class="result-msg" id="resultMsg">—</div>
+    </div>
+
+    
+    <button class="play-again-btn hidden" id="playAgainBtn" onclick="resetRound()">
+      Play Again
+    </button>
+
+    
+    <div class="history">
+      <div class="history-title">
+        Round History
+        <button class="clear-btn" onclick="clearHistory()">Clear</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="history-empty">No rounds played yet</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const emojis = { rock: '✊', paper: '🖐', scissors: '✌️' };
+    const scores = { win: 0, lose: 0, tie: 0 };
+    const history = [];
+
+    async function play(choice) {
+     
+      document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+
+     
+      document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+
+      try {
+        const res = await fetch('/play', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ choice })
+        });
+        const data = await res.json();
+
+        if (data.error) { alert(data.error); return; }
+
+      
+        document.getElementById('userEmoji').textContent = emojis[data.user_choice];
+        document.getElementById('cpuEmoji').textContent  = emojis[data.computer_choice];
+        const msgEl = document.getElementById('resultMsg');
+        msgEl.textContent  = data.message;
+        msgEl.className    = 'result-msg ' + data.result;
+
+        const box = document.getElementById('resultBox');
+        box.classList.remove('hidden');
+
+       
+        if (data.result === 'win')  scores.win++;
+        if (data.result === 'lose') scores.lose++;
+        if (data.result === 'tie')  scores.tie++;
+        document.getElementById('scoreYou').textContent = scores.win;
+        document.getElementById('scoreCpu').textContent = scores.lose;
+        document.getElementById('scoreTie').textContent = scores.tie;
+
+       
+        history.unshift({
+          user: data.user_choice,
+          cpu: data.computer_choice,
+          result: data.result
+        });
+        if (history.length > 10) history.pop();
+        renderHistory();
+
+   
+        document.getElementById('playAgainBtn').classList.remove('hidden');
+
+      } catch {
+        alert('Something went wrong. Try again.');
+        document.querySelectorAll('.choice-btn').forEach(b => b.disabled = false);
+      }
+    }
+
+    function resetRound() {
+      document.querySelectorAll('.choice-btn').forEach(b => {
+        b.disabled = false;
+        b.classList.remove('selected');
+      });
+      document.getElementById('resultBox').classList.add('hidden');
+      document.getElementById('playAgainBtn').classList.add('hidden');
+    }
+
+    function renderHistory() {
+      const list = document.getElementById('historyList');
+      if (history.length === 0) {
+        list.innerHTML = '<div class="history-empty">No rounds played yet</div>';
+        return;
+      }
+      list.innerHTML = history.map((h, i) =>
+        `<div class="history-item">
+          <span>Round ${scores.win + scores.lose + scores.tie - i} &nbsp; ${emojis[h.user]} vs ${emojis[h.cpu]}</span>
+          <span class="history-badge badge-${h.result}">${h.result.toUpperCase()}</span>
+        </div>`
+      ).join('');
+    }
+
+    function clearHistory() {
+      history.length = 0;
+      renderHistory();
+    }
+  </script>
+</body>
+</html>
